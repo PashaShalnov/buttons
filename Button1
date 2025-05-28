@@ -1,0 +1,201 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Form 1</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap" rel="stylesheet">
+    <style>
+        /* Reset to prevent inherited styles from affecting our elements */
+        .payment-wrapper * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .payment-wrapper {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 8px;
+            position: relative;
+            width: 100%;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+ 
+        .payment-button {
+            background-color: #000;
+            color: white;
+            padding: 8px 10px;
+            border: none;
+            border-radius: 100px;
+            cursor: pointer;
+            font-size: 8px;
+            font-family: 'Montserrat', sans-serif;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        .payment-button:hover {
+            background-color: #555;
+        }
+
+        .error-container {
+            width: 100%;
+            height: 20px;
+            position: relative;
+            margin-bottom: -5px;
+            text-align: left;
+        }
+
+        .error-message {
+            color: red;
+            font-size: 8px;
+            font-family: 'Montserrat', sans-serif;
+            display: flex;
+            align-items: center;
+            text-align: left;
+            width: 100%;
+        }
+
+        .error-icon {
+            display: inline-flex;
+            min-width: 10px;
+            height: 10px;
+            background-color: red;
+            border-radius: 50%;
+            color: white;
+            justify-content: center;
+            align-items: center;
+            margin-right: 5px;
+            font-size: 7px;
+            flex-shrink: 0;
+        }
+
+        .loading-spinner {
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-left-color: #fff;
+            border-radius: 50%;
+            width: 8px;
+            height: 8px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="payment-wrapper" id="payment-widget-10usd">
+        <div class="error-container">
+            <div id="errorMessageContainer10usd" class="error-message"></div>
+        </div>
+        <button class="payment-button payment-button-10-usd" id="paymentButton10usd">
+            ТЕКТ КНОПКИ
+        </button>
+    </div>
+
+    <script>
+        (function() {
+            // Self-executing function to avoid global scope pollution
+            function sendPaymentRequest(amount, productName, buttonId, errorContainerId) {
+                const errorContainer = document.getElementById(errorContainerId);
+                errorContainer.innerHTML = '';
+                const button = document.getElementById(buttonId);
+                if (!button) return;
+                
+                const originalButtonText = button.innerHTML;
+
+                const data = {
+                    amount: amountNumber,
+                    currency: "EUR",
+                    productName: productName/TemplateName,
+		            apiKey: API_KEY
+	
+                };
+                
+                button.innerHTML = '<span class="loading-spinner"></span>Loading...';
+                button.disabled = true;
+                button.style.cursor = 'wait';
+
+                fetch('https://api.paymentgateway.services/api/payments/create-link', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+			            'Api-key': 'API_KEY'
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data && data.paymentUrl) {
+                        window.location.href = data.paymentUrl;
+                    } else {
+                        throw new Error('Invalid response format: paymentUrl missing.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    const errorMessage = document.createElement('div');
+                    errorMessage.classList.add('error-message');
+                    
+                    const errorIcon = document.createElement('span');
+                    errorIcon.classList.add('error-icon');
+                    errorIcon.innerHTML = '!';
+                    
+                    errorMessage.appendChild(errorIcon);
+                    errorMessage.appendChild(document.createTextNode("Что-то пошло не так, попробуйте еще раз"));
+                    
+                    errorContainer.innerHTML = '';
+                    errorContainer.appendChild(errorMessage);
+                })
+                .finally(() => {
+                    button.innerHTML = originalButtonText;
+                    button.disabled = false;
+                    button.style.cursor = 'pointer';
+                });
+            }
+
+            // Function to initialize the payment button
+            function initPaymentButton() {
+                const button = document.getElementById('paymentButton10usd');
+                if (button) {
+                    // Remove any existing event listeners
+                    button.replaceWith(button.cloneNode(true));
+                    
+                    // Add event listener to the new button
+                    document.getElementById('paymentButton10usd').addEventListener('click', function(event) {
+                        event.preventDefault();
+                        sendPaymentRequest(10.00, "Рэб Нухем", "paymentButton10usd", "errorMessageContainer10usd");
+                    });
+                } else {
+                    // If button not found, try again in 100ms
+                    setTimeout(initPaymentButton, 100);
+                }
+            }
+
+            // Initialize when DOM is ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initPaymentButton);
+            } else {
+                initPaymentButton();
+            }
+        })();
+    </script>
+</body>
+</html>
