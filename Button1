@@ -120,7 +120,6 @@
                     amount: amountNumber,
                     currency: "EUR",
                     productName: productName/TemplateName,
-		            apiKey: API_KEY
 	
                 };
                 
@@ -181,7 +180,7 @@
                     // Add event listener to the new button
                     document.getElementById('paymentButton10usd').addEventListener('click', function(event) {
                         event.preventDefault();
-                        sendPaymentRequest(10.00, "Рэб Нухем", "paymentButton10usd", "errorMessageContainer10usd");
+                        sendPaymentRequest(250.00, "Описание товара", "paymentButton10usd", "errorMessageContainer10usd");
                     });
                 } else {
                     // If button not found, try again in 100ms
